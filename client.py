@@ -1,6 +1,6 @@
-#main thread hangs up on input so checking is_alive at the top doesn't accomplish anything since the thread
+#main thread hangs up on input so checking if rThread is alive doesn't accomplish anything since the thread
 #will pass the check on startup and never advance until you input something
-#os._exit() passed autograder on the other client file
+#os._exit() succesfully shuts down client immediately
 
 from socket import *
 import sys
@@ -25,40 +25,12 @@ def main():
         print(response.decode('utf-8').strip())
     rThread = threading.Thread(target=receive,args=[clntSck])
     rThread.start()
-    
-    #wThread = threading.Thread(target=write,args=[clntSck])
-    #wThread.start()
-    '''
-    while True:
-        try:
-        #    print('before trying recv')
-            msgReceipt = clntSck.recv(1024)
-        #    print("recv worked, don't know if msgReceipt null yet")
-            if msgReceipt:
-        #        print("got msg")
-                print(msgReceipt.decode('utf-8').strip())
-            else:
-        #        print("closing client in main/receive thread")
-                os._exit(1)
-        #Client exited in main thread
-        except ConnectionAbortedError:
-            os._exit(0)
-        #Server closed the connection
-        except ConnectionResetError:
-        #    print("receiving thread caught resetError")
-            wThread.join()
-            os._exit(1)
-        #except:
-        #    print("some other error")
 
-    '''
     while True:
-        #rThread.join() send test case said the string it printed was None
         if not rThread.is_alive():
             sys.exit(1)
         msgInput = input()
         if msgInput == ':Exit':
-            #rThread.join()
             clntSck.close()
             sys.exit(0)
         elif msgInput == ':)':
@@ -73,52 +45,17 @@ def main():
             dt = currTime[8:10]
             y = currTime[20:24]
             msgInput = 'It\'s %s on %s, %s %s, %s.' % (t, d, dt, m, y)
-        #This made client exit work?
         try:
-        #    print("before msg send")
             clntSck.send((msgInput + '\n').encode('utf-8'))
         #Server closed the connection
         except ConnectionResetError:
-        #    print("was trying to write, connectionResetError")
             sys.exit(1)
-
-#def write(clntSck):
-    while True:
-        #rThread.join() send test case said the string it printed was None
-        msgInput = input()
-        if msgInput == ':Exit':
-            #rThread.join()
-            clntSck.close()
-            os._exit(0)
-        elif msgInput == ':)':
-            msgInput = '[feeling happy]'
-        elif msgInput == ':(':
-            msgInput = '[feeling sad]'
-        elif msgInput == ':mytime':
-            currTime = time.asctime(time.localtime())
-            t = currTime[11:16]
-            d = currTime[:3]
-            m = currTime[4:7]
-            dt = currTime[8:10]
-            y = currTime[20:24]
-            msgInput = 'It\'s %s on %s, %s %s, %s.' % (t, d, dt, m, y)
-        #This made client exit work?
-        try:
-        #    print("before msg send")
-            clntSck.send((msgInput + '\n').encode('utf-8'))
-        #Server closed the connection
-        except ConnectionResetError:
-        #    print("was trying to write, connectionResetError")
-            os._exit(1)
 
 def receive(clntSck):
     while True:
         try:
-        #    print('before trying recv')
             msgReceipt = clntSck.recv(1024)
-        #    print("recv worked, don't know if msgReceipt null yet")
             if msgReceipt:
-        #        print("got msg")
                 print(msgReceipt.decode('utf-8').strip())
             else:
         #        print("closing client in main/receive thread")
@@ -130,7 +67,6 @@ def receive(clntSck):
         #Server closed the connection
         except ConnectionResetError:
             print("receiving thread caught resetError")
-            #wThread.join()
             sys.exit(1)
 
 if __name__ == '__main__':
