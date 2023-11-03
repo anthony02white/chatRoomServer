@@ -23,9 +23,6 @@ def main():
         elif name in users:
             connectionSckt.send(("Name already in use").encode('utf-8'))
             connectionSckt.close()
-        #elif " " in name:
-        #    connectionSckt.send(("Invalid name").encode('utf-8'))
-        #    connectionSckt.close()
         else:
             connectionSckt.send(("Welcome!\n").encode('utf-8'))
             print(name + " joined the chatroom")
@@ -63,7 +60,6 @@ def clientHandler(sck, name):
             broadcast(name + ": " + msg + "\n")
 
 def broadcast(msg):
-    #print(msg)
     for sck in users.values():
         sck.send(msg.encode('utf-8'))
 
